@@ -1,0 +1,1432 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>สต็อกสินค้า | ร้านข้าวสาร & อาหารสัตว์</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Thai:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F5F3EE;
+    --surface: #FFFFFF;
+    --surface2: #F0EDE6;
+    --border: #DDD9D0;
+    --border2: #C8C3B8;
+    --text: #1A1814;
+    --text2: #6B6760;
+    --text3: #9E9A93;
+    --accent: #2D5A3D;
+    --accent-light: #EAF2EC;
+    --accent-text: #1A3D27;
+    --danger: #8B2E1A;
+    --danger-light: #F5EAE7;
+    --amber: #7A4E0D;
+    --amber-light: #F7F0E3;
+    --blue: #1A3A5C;
+    --blue-light: #E8EEF5;
+    --radius: 10px;
+    --radius-sm: 6px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.08), 0 1px 2px rgba(0,0,0,0.04);
+    --shadow-md: 0 4px 12px rgba(0,0,0,0.10), 0 2px 4px rgba(0,0,0,0.06);
+    --font: 'IBM Plex Sans Thai', sans-serif;
+    --mono: 'IBM Plex Mono', monospace;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font); background: var(--bg); color: var(--text); font-size: 15px; min-height: 100vh; }
+
+  /* ===== TOPBAR ===== */
+  .topbar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 0 16px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky; top: 0; z-index: 100;
+    box-shadow: var(--shadow);
+  }
+  .topbar-brand { display: flex; align-items: center; gap: 10px; }
+  .topbar-brand .logo { width: 32px; height: 32px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: white; font-size: 16px; }
+  .topbar-brand h1 { font-size: 15px; font-weight: 600; color: var(--text); line-height: 1.2; }
+  .topbar-brand p { font-size: 11px; color: var(--text3); }
+  .topbar-actions { display: flex; gap: 8px; align-items: center; }
+  .btn-icon { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 6px 10px; font-size: 13px; cursor: pointer; color: var(--text2); font-family: var(--font); display: flex; align-items: center; gap: 5px; transition: all 0.15s; }
+  .btn-icon:hover { background: var(--surface2); border-color: var(--border2); }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: #ccc; display: inline-block; }
+  .status-dot.connected { background: #3B8A4A; }
+  .status-dot.error { background: #C0392B; }
+
+  /* ===== NAV TABS ===== */
+  .nav-tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    overflow-x: auto;
+    padding: 0 12px;
+    gap: 0;
+    -webkit-overflow-scrolling: touch;
+  }
+  .nav-tab {
+    padding: 12px 16px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--text3);
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: all 0.15s;
+    font-family: var(--font);
+    background: none;
+    border-top: none; border-left: none; border-right: none;
+  }
+  .nav-tab:hover { color: var(--text2); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
+  .tab-badge { background: var(--accent-light); color: var(--accent-text); font-size: 10px; padding: 1px 6px; border-radius: 10px; margin-left: 4px; font-weight: 600; }
+
+  /* ===== PAGES ===== */
+  .page { display: none; padding: 16px; max-width: 900px; margin: 0 auto; }
+  .page.active { display: block; }
+
+  /* ===== SECTION HEADER ===== */
+  .section-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+  .section-title { font-size: 17px; font-weight: 600; }
+  .section-sub { font-size: 12px; color: var(--text3); margin-top: 2px; }
+
+  /* ===== FORM CARD ===== */
+  .form-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; box-shadow: var(--shadow); margin-bottom: 16px; }
+  .form-row { display: grid; gap: 12px; margin-bottom: 12px; }
+  .form-row.cols-2 { grid-template-columns: 1fr 1fr; }
+  .form-row.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .form-row.cols-4 { grid-template-columns: 1fr 1fr 1fr 1fr; }
+  @media(max-width: 600px) {
+    .form-row.cols-2, .form-row.cols-3, .form-row.cols-4 { grid-template-columns: 1fr; }
+  }
+  .form-group { display: flex; flex-direction: column; gap: 5px; }
+  .form-group label { font-size: 12px; font-weight: 500; color: var(--text2); }
+  .form-group .required::after { content: ' *'; color: var(--danger); }
+  .form-control {
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    padding: 9px 12px;
+    font-size: 14px;
+    font-family: var(--font);
+    color: var(--text);
+    background: var(--surface);
+    transition: border-color 0.15s, box-shadow 0.15s;
+    width: 100%;
+  }
+  .form-control:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(45,90,61,0.12); }
+  .form-control::placeholder { color: var(--text3); }
+  select.form-control { cursor: pointer; }
+  textarea.form-control { resize: vertical; min-height: 72px; }
+
+  /* Autocomplete */
+  .autocomplete-wrap { position: relative; }
+  .autocomplete-list {
+    position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
+    background: var(--surface); border: 1px solid var(--border2);
+    border-radius: var(--radius-sm); box-shadow: var(--shadow-md);
+    max-height: 220px; overflow-y: auto; display: none; margin-top: 2px;
+  }
+  .autocomplete-list.show { display: block; }
+  .ac-item {
+    padding: 9px 12px; cursor: pointer; font-size: 13px;
+    display: flex; align-items: center; justify-content: space-between;
+    border-bottom: 1px solid var(--border);
+    transition: background 0.1s;
+  }
+  .ac-item:last-child { border-bottom: none; }
+  .ac-item:hover, .ac-item.selected { background: var(--accent-light); }
+  .ac-item .sku-code { font-family: var(--mono); font-size: 11px; color: var(--text3); }
+  .ac-item .sku-name { font-weight: 500; color: var(--text); }
+  .ac-item .sku-unit { font-size: 11px; color: var(--text3); background: var(--surface2); padding: 1px 6px; border-radius: 4px; }
+
+  /* ===== SKU LINE ITEMS TABLE ===== */
+  .items-table-wrap { overflow-x: auto; }
+  .items-table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 480px; }
+  .items-table th {
+    background: var(--surface2); padding: 9px 12px; text-align: left;
+    font-weight: 600; color: var(--text2); font-size: 12px;
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+  }
+  .items-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .items-table tr:last-child td { border-bottom: none; }
+  .items-table tr:hover td { background: var(--bg); }
+  .items-table .td-qty input {
+    width: 80px; border: 1px solid var(--border); border-radius: 5px;
+    padding: 5px 8px; font-size: 13px; font-family: var(--mono); text-align: right;
+    font-family: var(--font);
+  }
+  .items-table .td-qty input:focus { outline: none; border-color: var(--accent); }
+  .items-table .td-note input {
+    width: 140px; border: 1px solid var(--border); border-radius: 5px;
+    padding: 5px 8px; font-size: 13px; font-family: var(--font);
+  }
+  .items-table .td-note input:focus { outline: none; border-color: var(--accent); }
+  .btn-del { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 15px; padding: 3px 6px; border-radius: 4px; transition: all 0.1s; }
+  .btn-del:hover { background: var(--danger-light); color: var(--danger); }
+  .tag-in { background: var(--accent-light); color: var(--accent-text); font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
+  .tag-out { background: var(--danger-light); color: var(--danger); font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
+  .tag-adj { background: var(--amber-light); color: var(--amber); font-size: 11px; padding: 2px 7px; border-radius: 10px; font-weight: 500; }
+
+  /* ===== BUTTONS ===== */
+  .btn { border: none; border-radius: var(--radius-sm); padding: 9px 16px; font-size: 14px; font-family: var(--font); font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.15s; }
+  .btn-primary { background: var(--accent); color: white; }
+  .btn-primary:hover { background: var(--accent-text); }
+  .btn-primary:disabled { background: #9BB8A5; cursor: not-allowed; }
+  .btn-secondary { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
+  .btn-secondary:hover { background: var(--border); }
+  .btn-danger { background: var(--danger-light); color: var(--danger); border: 1px solid #E8BFB5; }
+  .btn-danger:hover { background: #EBD0CB; }
+  .btn-sm { padding: 6px 12px; font-size: 13px; }
+  .btn-add-line { width: 100%; border: 1px dashed var(--border2); background: none; border-radius: var(--radius-sm); padding: 9px; font-size: 13px; color: var(--text2); cursor: pointer; font-family: var(--font); transition: all 0.15s; }
+  .btn-add-line:hover { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
+  .actions-row { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; margin-top: 14px; }
+
+  /* ===== TYPE SELECTOR ===== */
+  .type-selector { display: flex; gap: 8px; margin-bottom: 16px; }
+  .type-btn {
+    flex: 1; border: 2px solid var(--border); border-radius: var(--radius-sm);
+    padding: 10px 8px; font-family: var(--font); font-size: 13px; font-weight: 500;
+    cursor: pointer; text-align: center; transition: all 0.15s; background: var(--surface);
+    color: var(--text2);
+  }
+  .type-btn.active-in { border-color: var(--accent); background: var(--accent-light); color: var(--accent-text); }
+  .type-btn.active-out { border-color: var(--danger); background: var(--danger-light); color: var(--danger); }
+  .type-btn.active-adj { border-color: var(--amber); background: var(--amber-light); color: var(--amber); }
+  .type-icon { font-size: 18px; display: block; margin-bottom: 2px; }
+
+  /* ===== DOCNUM DISPLAY ===== */
+  .docnum-display {
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: var(--radius-sm); padding: 8px 12px;
+    font-family: var(--mono); font-size: 14px; color: var(--text);
+    font-weight: 500; letter-spacing: 0.5px;
+  }
+
+  /* ===== TOAST ===== */
+  .toast-container { position: fixed; bottom: 20px; right: 20px; z-index: 9999; display: flex; flex-direction: column; gap: 8px; }
+  .toast {
+    background: var(--text); color: white; padding: 12px 16px;
+    border-radius: var(--radius); font-size: 13px; box-shadow: var(--shadow-md);
+    display: flex; align-items: center; gap: 8px; min-width: 240px;
+    animation: slideIn 0.2s ease; max-width: 320px;
+  }
+  .toast.success { background: var(--accent); }
+  .toast.error { background: var(--danger); }
+  .toast.warning { background: #7A4E0D; }
+  @keyframes slideIn { from { transform: translateX(40px); opacity: 0; } to { transform: translateX(0); opacity: 1; } }
+
+  /* ===== SETTINGS PAGE ===== */
+  .settings-block { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-bottom: 14px; }
+  .settings-block h3 { font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
+  .settings-hint { font-size: 12px; color: var(--text3); line-height: 1.6; margin-top: 8px; }
+  .settings-hint code { background: var(--surface2); border: 1px solid var(--border); padding: 1px 5px; border-radius: 3px; font-family: var(--mono); font-size: 11px; color: var(--text); }
+  .copy-btn { background: var(--surface2); border: 1px solid var(--border); border-radius: 4px; padding: 3px 8px; font-size: 11px; cursor: pointer; font-family: var(--font); }
+
+  /* ===== HISTORY PAGE ===== */
+  .filter-bar { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; align-items: center; }
+  .filter-bar select, .filter-bar input { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 7px 10px; font-size: 13px; font-family: var(--font); color: var(--text); background: var(--surface); }
+  .filter-bar select:focus, .filter-bar input:focus { outline: none; border-color: var(--accent); }
+  .history-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .history-table th { background: var(--surface2); padding: 9px 12px; text-align: left; font-weight: 600; color: var(--text2); font-size: 12px; border-bottom: 1px solid var(--border); white-space: nowrap; }
+  .history-table td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+  .history-table tr:hover td { background: var(--bg); }
+  .mono { font-family: var(--mono); font-size: 12px; }
+  .empty-state { text-align: center; padding: 48px 20px; color: var(--text3); }
+  .empty-state .icon { font-size: 40px; margin-bottom: 8px; }
+  .empty-state p { font-size: 14px; }
+
+  /* ===== STOCK SUMMARY ===== */
+  .summary-search { margin-bottom: 14px; }
+  .summary-search input { width: 100%; }
+  .stock-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+  .stock-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px; }
+  .stock-card .sku-label { font-size: 11px; font-family: var(--mono); color: var(--text3); margin-bottom: 3px; }
+  .stock-card .sku-name { font-size: 14px; font-weight: 500; color: var(--text); margin-bottom: 8px; line-height: 1.3; }
+  .stock-card .stock-qty { font-size: 24px; font-weight: 600; color: var(--text); font-family: var(--mono); line-height: 1; }
+  .stock-card .stock-unit { font-size: 12px; color: var(--text3); margin-left: 4px; }
+  .stock-card.low { border-left: 3px solid #C0392B; }
+  .stock-card.zero { border-left: 3px solid #E74C3C; background: #FEF9F9; }
+  .loading-overlay { display: none; position: fixed; inset: 0; background: rgba(255,255,255,0.8); z-index: 9000; align-items: center; justify-content: center; flex-direction: column; gap: 12px; }
+  .loading-overlay.show { display: flex; }
+  .spinner { width: 36px; height: 36px; border: 3px solid var(--border); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.7s linear infinite; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .loading-msg { font-size: 14px; color: var(--text2); }
+
+  /* ===== MODAL ===== */
+  .modal-backdrop { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.4); z-index: 500; align-items: center; justify-content: center; padding: 16px; }
+  .modal-backdrop.show { display: flex; }
+  .modal { background: var(--surface); border-radius: var(--radius); box-shadow: var(--shadow-md); padding: 20px; max-width: 420px; width: 100%; }
+  .modal h3 { font-size: 16px; font-weight: 600; margin-bottom: 12px; }
+  .modal-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; }
+  .script-code { background: #1E1E1E; color: #D4D4D4; border-radius: var(--radius-sm); padding: 14px; font-family: var(--mono); font-size: 11px; line-height: 1.7; overflow-x: auto; white-space: pre; max-height: 260px; overflow-y: auto; margin: 10px 0; border: 1px solid var(--border); }
+
+  @media(max-width: 480px) {
+    .topbar-brand h1 { font-size: 13px; }
+    .page { padding: 12px; }
+    .type-selector { gap: 6px; }
+    .type-btn { font-size: 12px; padding: 8px 6px; }
+    .stock-grid { grid-template-columns: 1fr 1fr; }
+  }
+
+  /* ===== PIN LOCK SCREEN ===== */
+  #pinScreen {
+    display: none;
+    position: fixed; inset: 0; z-index: 10000;
+    background: var(--accent);
+    align-items: center; justify-content: center;
+    flex-direction: column;
+  }
+  #pinScreen.show { display: flex; }
+  .pin-card {
+    background: white; border-radius: 20px;
+    padding: 32px 28px; width: 320px; max-width: 92vw;
+    text-align: center; box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+  }
+  .pin-logo { font-size: 40px; margin-bottom: 8px; }
+  .pin-title { font-size: 20px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+  .pin-sub { font-size: 13px; color: var(--text3); margin-bottom: 24px; }
+  .pin-dots { display: flex; gap: 14px; justify-content: center; margin-bottom: 28px; }
+  .pin-dot {
+    width: 18px; height: 18px; border-radius: 50%;
+    border: 2px solid var(--border2); background: transparent;
+    transition: all 0.15s;
+  }
+  .pin-dot.filled { background: var(--accent); border-color: var(--accent); }
+  .pin-dot.error { background: var(--danger); border-color: var(--danger); animation: shake 0.3s; }
+  @keyframes shake {
+    0%,100% { transform: translateX(0); }
+    25% { transform: translateX(-6px); }
+    75% { transform: translateX(6px); }
+  }
+  .pin-keypad { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+  .pin-key {
+    height: 62px; border: none; border-radius: 12px;
+    background: var(--surface2); font-size: 22px; font-weight: 500;
+    color: var(--text); cursor: pointer; font-family: var(--font);
+    transition: all 0.1s; border: 1px solid var(--border);
+    -webkit-tap-highlight-color: transparent;
+  }
+  .pin-key:active { background: var(--border2); transform: scale(0.94); }
+  .pin-key.zero { grid-column: 2; }
+  .pin-key.del { font-size: 18px; background: var(--danger-light); color: var(--danger); border-color: #E8BFB5; }
+  .pin-error-msg { font-size: 13px; color: var(--danger); min-height: 20px; margin-top: -12px; margin-bottom: 10px; }
+  .pin-attempts { font-size: 12px; color: var(--text3); margin-top: 12px; }
+  .pin-locked { color: var(--danger); font-weight: 500; }
+
+  /* Admin modal extras */
+  .pin-change-section { margin-top: 12px; padding-top: 12px; border-top: 1px solid var(--border); }
+  .pin-mode-toggle { display: flex; gap: 6px; margin-bottom: 14px; }
+  .pin-mode-btn { flex: 1; padding: 8px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); font-size: 13px; font-family: var(--font); cursor: pointer; transition: all 0.15s; }
+  .pin-mode-btn.active { background: var(--accent); color: white; border-color: var(--accent); }
+</style>
+</head>
+<body>
+
+<!-- PIN LOCK SCREEN -->
+<div id="pinScreen" class="show">
+  <div class="pin-card">
+    <div class="pin-logo">🌾</div>
+    <div class="pin-title" id="pinTitle">Stock Manager</div>
+    <div class="pin-sub" id="pinSub">ใส่รหัส PIN เพื่อเข้าใช้งาน</div>
+    <div class="pin-dots" id="pinDots">
+      <div class="pin-dot" id="d0"></div>
+      <div class="pin-dot" id="d1"></div>
+      <div class="pin-dot" id="d2"></div>
+      <div class="pin-dot" id="d3"></div>
+    </div>
+    <div class="pin-error-msg" id="pinError"></div>
+    <div class="pin-keypad">
+      <button class="pin-key" onclick="pinPress('1')">1</button>
+      <button class="pin-key" onclick="pinPress('2')">2</button>
+      <button class="pin-key" onclick="pinPress('3')">3</button>
+      <button class="pin-key" onclick="pinPress('4')">4</button>
+      <button class="pin-key" onclick="pinPress('5')">5</button>
+      <button class="pin-key" onclick="pinPress('6')">6</button>
+      <button class="pin-key" onclick="pinPress('7')">7</button>
+      <button class="pin-key" onclick="pinPress('8')">8</button>
+      <button class="pin-key" onclick="pinPress('9')">9</button>
+      <button class="pin-key zero" onclick="pinPress('0')">0</button>
+      <button class="pin-key del" onclick="pinDel()">⌫</button>
+    </div>
+    <div class="pin-attempts" id="pinAttempts"></div>
+  </div>
+</div>
+
+<div class="loading-overlay" id="loadingOverlay">
+  <div class="spinner"></div>
+  <div class="loading-msg" id="loadingMsg">กำลังบันทึก...</div>
+</div>
+
+<!-- TOPBAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="logo">🌾</div>
+    <div>
+      <h1>Stock Manager</h1>
+      <p>ข้าวสาร & อาหารสัตว์</p>
+    </div>
+  </div>
+  <div class="topbar-actions">
+    <span style="font-size:12px;color:var(--text3);display:flex;align-items:center;gap:5px">
+      <span class="status-dot" id="statusDot"></span>
+      <span id="statusText">ยังไม่เชื่อมต่อ</span>
+    </span>
+    <button class="btn-icon" onclick="showPage('settings')">⚙ ตั้งค่า</button>
+    <button class="btn-icon" onclick="lockApp()" title="ล็อกแอป" style="color:var(--danger)">🔒</button>
+  </div>
+</div>
+
+<!-- NAV TABS -->
+<div class="nav-tabs">
+  <button class="nav-tab active" onclick="showPage('create')" id="tab-create">+ บันทึกเอกสาร</button>
+  <button class="nav-tab" onclick="showPage('history')" id="tab-history">ประวัติ <span class="tab-badge" id="histCount">0</span></button>
+  <button class="nav-tab" onclick="showPage('stock')" id="tab-stock">สต็อกคงเหลือ</button>
+  <button class="nav-tab" onclick="showPage('settings')" id="tab-settings">⚙ ตั้งค่า</button>
+</div>
+
+<!-- ======== PAGE: CREATE ======== -->
+<div class="page active" id="page-create">
+
+  <div class="section-header" style="margin-top:4px">
+    <div>
+      <div class="section-title">บันทึกเอกสาร</div>
+      <div class="section-sub">รับเข้า / ตัดออก / ปรับปรุง</div>
+    </div>
+  </div>
+
+  <!-- Type Selector -->
+  <div class="type-selector">
+    <button class="type-btn active-in" id="typeIn" onclick="setType('IN')">
+      <span class="type-icon">📥</span>รับเข้า
+    </button>
+    <button class="type-btn" id="typeOut" onclick="setType('OUT')">
+      <span class="type-icon">📤</span>ตัดออก
+    </button>
+    <button class="type-btn" id="typeAdj" onclick="setType('ADJ')">
+      <span class="type-icon">🔧</span>ปรับสต็อก
+    </button>
+  </div>
+
+  <div class="form-card">
+    <!-- Doc Header -->
+    <div class="form-row cols-3">
+      <div class="form-group">
+        <label class="required">เลขเอกสาร (Doc No.)</label>
+        <div class="docnum-display" id="docNumDisplay">—</div>
+      </div>
+      <div class="form-group">
+        <label class="required">วันที่</label>
+        <input type="date" id="docDate" class="form-control">
+      </div>
+      <div class="form-group">
+        <label>ผู้บันทึก</label>
+        <input type="text" id="docUser" class="form-control" placeholder="ชื่อ">
+      </div>
+    </div>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label>อ้างอิงเอกสาร (Ref.)</label>
+        <input type="text" id="docRef" class="form-control" placeholder="เลขใบส่งของ / Invoice">
+      </div>
+      <div class="form-group">
+        <label>หมายเหตุเอกสาร</label>
+        <input type="text" id="docNote" class="form-control" placeholder="บันทึกเพิ่มเติม">
+      </div>
+    </div>
+
+    <hr style="border:none;border-top:1px solid var(--border);margin:14px 0;">
+
+    <!-- Add SKU Line -->
+    <div style="margin-bottom:10px;display:flex;align-items:center;justify-content:space-between;">
+      <div style="font-size:13px;font-weight:600;color:var(--text2);">รายการสินค้า</div>
+      <div style="font-size:12px;color:var(--text3)" id="lineCount">0 รายการ</div>
+    </div>
+
+    <!-- Quick Add Row -->
+    <div class="form-row cols-3" style="align-items:flex-end;margin-bottom:8px">
+      <div class="form-group" style="grid-column:span 2">
+        <label>ค้นหา SKU / ชื่อสินค้า</label>
+        <div class="autocomplete-wrap">
+          <input type="text" id="skuSearch" class="form-control" placeholder="พิมพ์ชื่อหรือรหัสสินค้า..." autocomplete="off">
+          <div class="autocomplete-list" id="acList"></div>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>จำนวน</label>
+        <input type="number" id="qtyInput" class="form-control" placeholder="0" min="0" step="0.01">
+      </div>
+    </div>
+    <button class="btn-add-line" onclick="addSelectedSku()">+ เพิ่มรายการ</button>
+
+    <!-- Line Items Table -->
+    <div id="lineItemsWrap" style="margin-top:12px;display:none;">
+      <div class="items-table-wrap">
+        <table class="items-table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>รหัส SKU</th>
+              <th>ชื่อสินค้า</th>
+              <th>หน่วย</th>
+              <th>จำนวน</th>
+              <th>หมายเหตุบรรทัด</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="lineItemsTbody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="actions-row">
+    <button class="btn btn-secondary" onclick="clearForm()">🗑 ล้างฟอร์ม</button>
+    <button class="btn btn-primary" id="submitBtn" onclick="submitDoc()">💾 บันทึกลง Google Sheets</button>
+  </div>
+
+</div>
+
+<!-- ======== PAGE: HISTORY ======== -->
+<div class="page" id="page-history">
+  <div class="section-header" style="margin-top:4px">
+    <div>
+      <div class="section-title">ประวัติเอกสาร</div>
+      <div class="section-sub">ดูรายการที่บันทึกแล้ว</div>
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="loadHistory()">🔄 รีเฟรช</button>
+  </div>
+  <div class="filter-bar">
+    <select id="filterType" onchange="renderHistory()">
+      <option value="">ทุกประเภท</option>
+      <option value="IN">รับเข้า</option>
+      <option value="OUT">ตัดออก</option>
+      <option value="ADJ">ปรับสต็อก</option>
+    </select>
+    <input type="text" id="filterSku" placeholder="ค้นหา SKU / ชื่อ..." oninput="renderHistory()" style="flex:1;min-width:120px">
+    <input type="date" id="filterDate" onchange="renderHistory()">
+  </div>
+  <div style="overflow-x:auto;">
+    <table class="history-table" id="historyTable">
+      <thead>
+        <tr>
+          <th>Doc No.</th>
+          <th>วันที่</th>
+          <th>ประเภท</th>
+          <th>รหัส SKU</th>
+          <th>ชื่อสินค้า</th>
+          <th style="text-align:right">จำนวน</th>
+          <th>หน่วย</th>
+          <th>Ref.</th>
+          <th>ผู้บันทึก</th>
+        </tr>
+      </thead>
+      <tbody id="historyTbody">
+        <tr><td colspan="9"><div class="empty-state"><div class="icon">📋</div><p>ยังไม่มีข้อมูล — กด รีเฟรช หลังตั้งค่า Sheets URL</p></div></td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- ======== PAGE: STOCK ======== -->
+<div class="page" id="page-stock">
+  <div class="section-header" style="margin-top:4px">
+    <div>
+      <div class="section-title">สต็อกคงเหลือ</div>
+      <div class="section-sub">คำนวณจาก transaction ทั้งหมดใน Sheets</div>
+    </div>
+    <button class="btn btn-secondary btn-sm" onclick="loadStock()">🔄 รีเฟรช</button>
+  </div>
+  <div class="summary-search">
+    <input type="text" class="form-control" id="stockSearch" placeholder="ค้นหา SKU / ชื่อสินค้า..." oninput="renderStock()">
+  </div>
+  <div class="stock-grid" id="stockGrid">
+    <div class="empty-state" style="grid-column:1/-1"><div class="icon">📦</div><p>กด รีเฟรช เพื่อดูสต็อก</p></div>
+  </div>
+</div>
+
+<!-- ======== PAGE: SETTINGS ======== -->
+<div class="page" id="page-settings">
+  <div class="section-header" style="margin-top:4px">
+    <div class="section-title">⚙ ตั้งค่าระบบ</div>
+  </div>
+
+  <div class="settings-block">
+    <h3>🔗 เชื่อมต่อ Google Sheets (Apps Script)</h3>
+    <div class="form-group" style="margin-bottom:8px">
+      <label>Web App URL จาก Google Apps Script</label>
+      <div style="display:flex;gap:6px">
+        <input type="text" id="scriptUrl" class="form-control" placeholder="https://script.google.com/macros/s/AKfyc.../exec">
+        <button class="btn btn-secondary btn-sm" onclick="testConnection()">ทดสอบ</button>
+      </div>
+    </div>
+    <div class="settings-hint">
+      วาง URL ของ Google Apps Script Web App ที่ Deploy แล้ว (<strong>Execute as: Me, Who has access: Anyone</strong>)
+    </div>
+    <div style="margin-top:10px">
+      <button class="btn btn-primary btn-sm" onclick="saveSettings()">💾 บันทึก URL</button>
+    </div>
+  </div>
+
+  <div class="settings-block">
+    <h3>📋 Google Apps Script — คัดลอกโค้ดนี้</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:8px">1. เปิด Google Sheets → Extensions → Apps Script → วางโค้ดด้านล่าง → Deploy → Web App</p>
+    <div style="display:flex;justify-content:flex-end;margin-bottom:6px">
+      <button class="copy-btn" onclick="copyScript()">📋 คัดลอกทั้งหมด</button>
+    </div>
+    <div class="script-code" id="scriptCodeDisplay"></div>
+    <div class="settings-hint">
+      หลัง Deploy: ตั้ง <code>Execute as: Me</code> และ <code>Who has access: Anyone</code> แล้ว copy URL มาวางด้านบน
+    </div>
+  </div>
+
+  <div class="settings-block">
+    <h3>📦 ข้อมูล SKU Master</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:10px">เพิ่ม/แก้ไข SKU โดยตรงใน Google Sheets Sheet ชื่อ <code>SKU_MASTER</code></p>
+    <p style="font-size:12px;color:var(--text3);">คอลัมน์: <code>SKU_CODE</code> | <code>SKU_NAME</code> | <code>UNIT</code> | <code>CATEGORY</code> | <code>MIN_QTY</code></p>
+    <div style="margin-top:10px;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn btn-secondary btn-sm" onclick="loadSkuMaster()">🔄 โหลด SKU จาก Sheets</button>
+      <button class="btn btn-secondary btn-sm" onclick="showSkuModal()">+ เพิ่ม SKU ชั่วคราว (local)</button>
+    </div>
+    <div id="skuCount" style="font-size:12px;color:var(--text3);margin-top:8px">SKU ที่โหลดมา: 0 รายการ</div>
+  </div>
+
+  <div class="settings-block">
+    <h3>🏪 ข้อมูลร้าน</h3>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label>ชื่อร้าน</label>
+        <input type="text" id="storeName" class="form-control" placeholder="ร้านข้าวสารสุราษฎร์">
+      </div>
+      <div class="form-group">
+        <label>Prefix เอกสาร รับเข้า</label>
+        <input type="text" id="prefixIn" class="form-control" placeholder="RCV" maxlength="5">
+      </div>
+      <div class="form-group">
+        <label>Prefix เอกสาร ตัดออก</label>
+        <input type="text" id="prefixOut" class="form-control" placeholder="ISS" maxlength="5">
+      </div>
+      <div class="form-group">
+        <label>Prefix เอกสาร ปรับสต็อก</label>
+        <input type="text" id="prefixAdj" class="form-control" placeholder="ADJ" maxlength="5">
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm" style="margin-top:8px" onclick="saveStoreSettings()">💾 บันทึก</button>
+  </div>
+
+  <div class="settings-block">
+    <h3>🔐 จัดการรหัส PIN</h3>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:12px">PIN ใช้ป้องกันการเข้าใช้งาน app โดยไม่ได้รับอนุญาต<br>ระบบจะล็อกอัตโนมัติเมื่อไม่ใช้งาน 10 นาที</p>
+    <div class="pin-mode-toggle">
+      <button class="pin-mode-btn active" id="changePinTab" onclick="showPinTab('change')">เปลี่ยน PIN ผู้ใช้</button>
+      <button class="pin-mode-btn" id="changeAdminTab" onclick="showPinTab('admin')">เปลี่ยน PIN Admin</button>
+    </div>
+    <div id="changePinSection">
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>PIN เดิม (4 หลัก)</label>
+          <input type="password" id="oldPin" class="form-control" maxlength="4" inputmode="numeric" placeholder="••••">
+        </div>
+        <div class="form-group">
+          <label>PIN ใหม่ (4 หลัก)</label>
+          <input type="password" id="newPin" class="form-control" maxlength="4" inputmode="numeric" placeholder="••••">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>ยืนยัน PIN ใหม่</label>
+        <input type="password" id="confirmPin" class="form-control" maxlength="4" inputmode="numeric" placeholder="••••">
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="changePin('user')">🔐 เปลี่ยน PIN</button>
+    </div>
+    <div id="changeAdminSection" style="display:none">
+      <div class="form-row cols-2">
+        <div class="form-group">
+          <label>PIN Admin เดิม (4 หลัก)</label>
+          <input type="password" id="oldAdminPin" class="form-control" maxlength="4" inputmode="numeric" placeholder="••••">
+        </div>
+        <div class="form-group">
+          <label>PIN Admin ใหม่ (4 หลัก)</label>
+          <input type="password" id="newAdminPin" class="form-control" maxlength="4" inputmode="numeric" placeholder="••••">
+        </div>
+      </div>
+      <div class="form-group" style="margin-bottom:10px">
+        <label>ยืนยัน PIN Admin ใหม่</label>
+        <input type="password" id="confirmAdminPin" class="form-control" maxlength="4" inputmode="numeric" placeholder="••••">
+      </div>
+      <button class="btn btn-primary btn-sm" onclick="changePin('admin')">🔐 เปลี่ยน PIN Admin</button>
+    </div>
+    <div class="settings-hint" style="margin-top:10px">
+      <strong>PIN ผู้ใช้</strong> — สำหรับพนักงานบันทึกสต็อกทั่วไป<br>
+      <strong>PIN Admin</strong> — สำหรับเจ้าของร้าน ใช้เข้าหน้าตั้งค่าและเปลี่ยนรหัส<br>
+      PIN เริ่มต้น: ผู้ใช้ = <code>1234</code> | Admin = <code>9999</code>
+    </div>
+  </div>
+
+  <div class="settings-block">
+    <h3>📱 วิธีใช้งานบนมือถือ</h3>
+    <div style="font-size:13px;color:var(--text2);line-height:2">
+      <div style="margin-bottom:8px"><strong>วิธีที่ 1 — บันทึกไฟล์ใช้ออฟไลน์</strong></div>
+      1. ดาวน์โหลดไฟล์ <code>stock_app.html</code> ไปไว้ในมือถือ<br>
+      2. เปิดด้วย Chrome / Safari แล้วกด <strong>Add to Home Screen</strong><br>
+      3. จะได้ icon บนหน้าจอ กดเปิดได้เลย (ไม่ต้อง internet)<br><br>
+      <div style="margin-bottom:8px"><strong>วิธีที่ 2 — เปิดผ่าน URL (แนะนำถ้ามีหลายมือถือ)</strong></div>
+      1. อัปโหลดไฟล์ขึ้น GitHub Pages หรือ Google Drive<br>
+      2. แชร์ URL ให้พนักงาน เปิดด้วย Chrome แล้ว Add to Home Screen<br>
+      3. ทุกคนใช้ URL เดียวกัน อัปเดตครั้งเดียวใช้ได้ทุกเครื่อง
+    </div>
+  </div>
+</div>
+
+<!-- TOAST CONTAINER -->
+<div class="toast-container" id="toastContainer"></div>
+
+<!-- SKU ADD MODAL -->
+<div class="modal-backdrop" id="skuModal">
+  <div class="modal">
+    <h3>+ เพิ่ม SKU ชั่วคราว</h3>
+    <div class="form-row cols-2">
+      <div class="form-group">
+        <label class="required">รหัส SKU</label>
+        <input type="text" id="mSkuCode" class="form-control" placeholder="RICE001">
+      </div>
+      <div class="form-group">
+        <label class="required">ชื่อสินค้า</label>
+        <input type="text" id="mSkuName" class="form-control" placeholder="ข้าวหอมมะลิ 105">
+      </div>
+      <div class="form-group">
+        <label>หน่วย</label>
+        <input type="text" id="mSkuUnit" class="form-control" placeholder="กก.">
+      </div>
+      <div class="form-group">
+        <label>หมวดหมู่</label>
+        <input type="text" id="mSkuCat" class="form-control" placeholder="ข้าวสาร">
+      </div>
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-secondary" onclick="closeSkuModal()">ยกเลิก</button>
+      <button class="btn btn-primary" onclick="addLocalSku()">+ เพิ่ม</button>
+    </div>
+  </div>
+</div>
+
+<script>
+// ========== STATE ==========
+let state = {
+  type: 'IN',
+  docNum: '',
+  lines: [],
+  skuList: [],
+  allRows: [],
+  stockData: {},
+  scriptUrl: '',
+  settings: {
+    storeName: '',
+    prefixIn: 'RCV',
+    prefixOut: 'ISS',
+    prefixAdj: 'ADJ'
+  }
+};
+
+let selectedSkuForAdd = null;
+let acIndex = -1;
+
+// ========== INIT ==========
+function init() {
+  loadLocalStorage();
+  setTodayDate();
+  generateDocNum();
+  loadSettings();
+  renderSkuCount();
+  renderScriptCode();
+  if (state.scriptUrl) {
+    loadSkuMaster();
+  }
+}
+
+function loadLocalStorage() {
+  const url = localStorage.getItem('scriptUrl') || '';
+  const settings = JSON.parse(localStorage.getItem('storeSettings') || '{}');
+  const skus = JSON.parse(localStorage.getItem('skuList') || '[]');
+  state.scriptUrl = url;
+  state.settings = { ...state.settings, ...settings };
+  if (skus.length) state.skuList = skus;
+  document.getElementById('scriptUrl').value = url;
+}
+
+function loadSettings() {
+  document.getElementById('storeName').value = state.settings.storeName || '';
+  document.getElementById('prefixIn').value = state.settings.prefixIn || 'RCV';
+  document.getElementById('prefixOut').value = state.settings.prefixOut || 'ISS';
+  document.getElementById('prefixAdj').value = state.settings.prefixAdj || 'ADJ';
+}
+
+function setTodayDate() {
+  const today = new Date().toISOString().split('T')[0];
+  document.getElementById('docDate').value = today;
+}
+
+function generateDocNum() {
+  const prefix = state.type === 'IN' ? state.settings.prefixIn :
+                 state.type === 'OUT' ? state.settings.prefixOut : state.settings.prefixAdj;
+  const d = new Date();
+  const yy = String(d.getFullYear()).slice(-2);
+  const mm = String(d.getMonth()+1).padStart(2,'0');
+  const dd = String(d.getDate()).padStart(2,'0');
+  const rand = String(Math.floor(Math.random()*9000)+1000);
+  state.docNum = `${prefix}${yy}${mm}${dd}-${rand}`;
+  document.getElementById('docNumDisplay').textContent = state.docNum;
+}
+
+// ========== PAGE NAVIGATION ==========
+function showPage(name) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  document.getElementById('tab-'+name)?.classList.add('active');
+  if (name === 'history') loadHistory();
+  if (name === 'stock') loadStock();
+}
+
+// ========== DOC TYPE ==========
+function setType(t) {
+  state.type = t;
+  document.getElementById('typeIn').className = 'type-btn';
+  document.getElementById('typeOut').className = 'type-btn';
+  document.getElementById('typeAdj').className = 'type-btn';
+  if (t === 'IN') document.getElementById('typeIn').className = 'type-btn active-in';
+  if (t === 'OUT') document.getElementById('typeOut').className = 'type-btn active-out';
+  if (t === 'ADJ') document.getElementById('typeAdj').className = 'type-btn active-adj';
+  generateDocNum();
+}
+
+// ========== AUTOCOMPLETE ==========
+const skuSearchEl = document.getElementById('skuSearch');
+const acListEl = document.getElementById('acList');
+
+skuSearchEl.addEventListener('input', function() {
+  const q = this.value.trim().toLowerCase();
+  if (!q) { acListEl.classList.remove('show'); return; }
+  const results = state.skuList.filter(s =>
+    s.code.toLowerCase().includes(q) || s.name.toLowerCase().includes(q)
+  ).slice(0, 20);
+  if (!results.length) { acListEl.classList.remove('show'); selectedSkuForAdd = null; return; }
+  acListEl.innerHTML = results.map((s, i) => `
+    <div class="ac-item" onclick="selectSku('${s.code}')" data-i="${i}">
+      <div>
+        <div class="sku-name">${s.name}</div>
+        <div class="sku-code">${s.code}</div>
+      </div>
+      <span class="sku-unit">${s.unit || ''}</span>
+    </div>
+  `).join('');
+  acListEl.classList.add('show');
+  acIndex = -1;
+  selectedSkuForAdd = null;
+});
+
+skuSearchEl.addEventListener('keydown', function(e) {
+  const items = acListEl.querySelectorAll('.ac-item');
+  if (e.key === 'ArrowDown') { acIndex = Math.min(acIndex+1, items.length-1); highlightAc(items); e.preventDefault(); }
+  if (e.key === 'ArrowUp') { acIndex = Math.max(acIndex-1, 0); highlightAc(items); e.preventDefault(); }
+  if (e.key === 'Enter') {
+    if (acIndex >= 0 && items[acIndex]) items[acIndex].click();
+    else addSelectedSku();
+    e.preventDefault();
+  }
+  if (e.key === 'Escape') { acListEl.classList.remove('show'); }
+});
+
+function highlightAc(items) {
+  items.forEach((el, i) => el.classList.toggle('selected', i === acIndex));
+  if (items[acIndex]) items[acIndex].scrollIntoView({ block: 'nearest' });
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('.autocomplete-wrap')) acListEl.classList.remove('show');
+});
+
+function selectSku(code) {
+  const sku = state.skuList.find(s => s.code === code);
+  if (!sku) return;
+  selectedSkuForAdd = sku;
+  skuSearchEl.value = `[${sku.code}] ${sku.name}`;
+  acListEl.classList.remove('show');
+  document.getElementById('qtyInput').focus();
+}
+
+function addSelectedSku() {
+  const qty = parseFloat(document.getElementById('qtyInput').value);
+  if (!selectedSkuForAdd) { showToast('กรุณาเลือก SKU ก่อน', 'warning'); return; }
+  if (!qty || qty <= 0) { showToast('กรุณาใส่จำนวน', 'warning'); return; }
+  const exists = state.lines.find(l => l.skuCode === selectedSkuForAdd.code);
+  if (exists) { showToast('SKU นี้มีในรายการแล้ว กรุณาแก้ไขจำนวนในตาราง', 'warning'); return; }
+  state.lines.push({ skuCode: selectedSkuForAdd.code, skuName: selectedSkuForAdd.name, unit: selectedSkuForAdd.unit || '', qty: qty, note: '' });
+  renderLines();
+  skuSearchEl.value = '';
+  document.getElementById('qtyInput').value = '';
+  selectedSkuForAdd = null;
+}
+
+// ========== LINE ITEMS ==========
+function renderLines() {
+  const tbody = document.getElementById('lineItemsTbody');
+  const wrap = document.getElementById('lineItemsWrap');
+  document.getElementById('lineCount').textContent = `${state.lines.length} รายการ`;
+  if (!state.lines.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  const typeTag = state.type === 'IN' ? '<span class="tag-in">IN</span>' :
+                  state.type === 'OUT' ? '<span class="tag-out">OUT</span>' : '<span class="tag-adj">ADJ</span>';
+  tbody.innerHTML = state.lines.map((l, i) => `
+    <tr>
+      <td style="color:var(--text3);font-size:12px">${i+1}</td>
+      <td class="mono">${l.skuCode}</td>
+      <td>${l.skuName}</td>
+      <td style="color:var(--text3)">${l.unit}</td>
+      <td class="td-qty"><input type="number" value="${l.qty}" min="0" step="0.01" onchange="updateLine(${i},'qty',this.value)"></td>
+      <td class="td-note"><input type="text" value="${l.note}" placeholder="หมายเหตุ" onchange="updateLine(${i},'note',this.value)"></td>
+      <td><button class="btn-del" onclick="removeLine(${i})">✕</button></td>
+    </tr>
+  `).join('');
+}
+
+function updateLine(i, field, val) {
+  if (field === 'qty') state.lines[i].qty = parseFloat(val) || 0;
+  else state.lines[i][field] = val;
+}
+
+function removeLine(i) {
+  state.lines.splice(i, 1);
+  renderLines();
+}
+
+function clearForm() {
+  state.lines = [];
+  renderLines();
+  document.getElementById('docRef').value = '';
+  document.getElementById('docNote').value = '';
+  skuSearchEl.value = '';
+  document.getElementById('qtyInput').value = '';
+  selectedSkuForAdd = null;
+  generateDocNum();
+}
+
+// ========== SUBMIT ==========
+async function submitDoc() {
+  if (!state.scriptUrl) { showToast('กรุณาตั้งค่า Google Apps Script URL ก่อน', 'error'); showPage('settings'); return; }
+  if (!state.lines.length) { showToast('กรุณาเพิ่มสินค้าอย่างน้อย 1 รายการ', 'warning'); return; }
+  const docDate = document.getElementById('docDate').value;
+  const docRef = document.getElementById('docRef').value.trim();
+  const docNote = document.getElementById('docNote').value.trim();
+  const docUser = document.getElementById('docUser').value.trim();
+  if (!docDate) { showToast('กรุณาเลือกวันที่', 'warning'); return; }
+
+  showLoading('กำลังบันทึกลง Google Sheets...');
+  document.getElementById('submitBtn').disabled = true;
+
+  const rows = state.lines.map(l => ({
+    docNum: state.docNum,
+    docDate: docDate,
+    type: state.type,
+    skuCode: l.skuCode,
+    skuName: l.skuName,
+    unit: l.unit,
+    qty: l.qty,
+    ref: docRef,
+    docNote: docNote,
+    lineNote: l.note,
+    user: docUser,
+    ts: new Date().toISOString()
+  }));
+
+  try {
+    const res = await fetch(state.scriptUrl, {
+      method: 'POST',
+      body: JSON.stringify({ action: 'appendRows', rows: rows })
+    });
+    const data = await res.json();
+    if (data.status === 'ok') {
+      showToast(`✓ บันทึกสำเร็จ ${rows.length} รายการ เอกสาร ${state.docNum}`, 'success');
+      updateHistCount();
+      clearForm();
+    } else {
+      showToast('เกิดข้อผิดพลาด: ' + (data.message || 'ไม่ทราบสาเหตุ'), 'error');
+    }
+  } catch (e) {
+    showToast('เชื่อมต่อ Sheets ไม่ได้: ' + e.message, 'error');
+  }
+  hideLoading();
+  document.getElementById('submitBtn').disabled = false;
+}
+
+// ========== HISTORY ==========
+async function loadHistory() {
+  if (!state.scriptUrl) return;
+  showLoading('กำลังโหลดประวัติ...');
+  try {
+    const res = await fetch(state.scriptUrl + '?action=getRows');
+    const data = await res.json();
+    if (data.status === 'ok') {
+      state.allRows = data.rows || [];
+      renderHistory();
+      updateHistCount();
+      setStatus(true);
+    } else { setStatus(false); }
+  } catch (e) { setStatus(false); showToast('โหลดประวัติไม่ได้: '+e.message, 'error'); }
+  hideLoading();
+}
+
+function renderHistory() {
+  const ft = document.getElementById('filterType').value;
+  const fs = document.getElementById('filterSku').value.toLowerCase();
+  const fd = document.getElementById('filterDate').value;
+  let rows = state.allRows;
+  if (ft) rows = rows.filter(r => r[2] === ft);
+  if (fs) rows = rows.filter(r => (r[3]||'').toLowerCase().includes(fs) || (r[4]||'').toLowerCase().includes(fs));
+  if (fd) rows = rows.filter(r => (r[1]||'').startsWith(fd));
+  const tbody = document.getElementById('historyTbody');
+  if (!rows.length) {
+    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state"><div class="icon">🔍</div><p>ไม่พบข้อมูล</p></div></td></tr>`;
+    return;
+  }
+  const sorted = [...rows].reverse();
+  tbody.innerHTML = sorted.map(r => {
+    const typeTag = r[2]==='IN' ? '<span class="tag-in">IN</span>' : r[2]==='OUT' ? '<span class="tag-out">OUT</span>' : '<span class="tag-adj">ADJ</span>';
+    return `<tr>
+      <td class="mono" style="font-size:12px">${r[0]||''}</td>
+      <td style="font-size:12px;white-space:nowrap">${r[1]||''}</td>
+      <td>${typeTag}</td>
+      <td class="mono" style="font-size:12px">${r[3]||''}</td>
+      <td>${r[4]||''}</td>
+      <td style="text-align:right;font-family:var(--mono);font-size:13px;font-weight:500">${Number(r[6]||0).toLocaleString()}</td>
+      <td style="color:var(--text3);font-size:12px">${r[5]||''}</td>
+      <td style="color:var(--text3);font-size:12px">${r[7]||''}</td>
+      <td style="color:var(--text3);font-size:12px">${r[10]||''}</td>
+    </tr>`;
+  }).join('');
+}
+
+function updateHistCount() {
+  document.getElementById('histCount').textContent = state.allRows.length;
+}
+
+// ========== STOCK ==========
+async function loadStock() {
+  if (!state.scriptUrl) { renderStock(); return; }
+  showLoading('คำนวณสต็อก...');
+  try {
+    const res = await fetch(state.scriptUrl + '?action=getRows');
+    const data = await res.json();
+    if (data.status === 'ok') {
+      const rows = data.rows || [];
+      const stock = {};
+      rows.forEach(r => {
+        const code = r[3]; const name = r[4]; const unit = r[5];
+        const qty = parseFloat(r[6]) || 0; const type = r[2];
+        if (!stock[code]) stock[code] = { name, unit, qty: 0 };
+        if (type === 'IN') stock[code].qty += qty;
+        else if (type === 'OUT') stock[code].qty -= qty;
+        else if (type === 'ADJ') stock[code].qty = qty;
+      });
+      state.stockData = stock;
+      renderStock();
+    }
+  } catch (e) { showToast('โหลดสต็อกไม่ได้', 'error'); }
+  hideLoading();
+}
+
+function renderStock() {
+  const q = document.getElementById('stockSearch').value.toLowerCase();
+  const grid = document.getElementById('stockGrid');
+  let entries = Object.entries(state.stockData);
+  if (q) entries = entries.filter(([code, d]) => code.toLowerCase().includes(q) || d.name.toLowerCase().includes(q));
+  if (!entries.length) {
+    grid.innerHTML = `<div class="empty-state" style="grid-column:1/-1"><div class="icon">📦</div><p>${q ? 'ไม่พบสินค้า' : 'กด รีเฟรช เพื่อดูสต็อก'}</p></div>`;
+    return;
+  }
+  entries.sort((a, b) => a[0].localeCompare(b[0]));
+  grid.innerHTML = entries.map(([code, d]) => {
+    const cls = d.qty <= 0 ? 'stock-card zero' : d.qty < 10 ? 'stock-card low' : 'stock-card';
+    return `<div class="${cls}">
+      <div class="sku-label">${code}</div>
+      <div class="sku-name">${d.name}</div>
+      <div><span class="stock-qty">${Number(d.qty.toFixed(2)).toLocaleString()}</span><span class="stock-unit">${d.unit}</span></div>
+    </div>`;
+  }).join('');
+}
+
+// ========== SKU MASTER ==========
+async function loadSkuMaster() {
+  if (!state.scriptUrl) return;
+  showLoading('โหลด SKU...');
+  try {
+    const res = await fetch(state.scriptUrl + '?action=getSkus');
+    const data = await res.json();
+    if (data.status === 'ok' && data.skus?.length) {
+      state.skuList = data.skus.map(s => ({ code: s[0], name: s[1], unit: s[2]||'', category: s[3]||'' }));
+      localStorage.setItem('skuList', JSON.stringify(state.skuList));
+      renderSkuCount();
+      showToast(`โหลด SKU สำเร็จ ${state.skuList.length} รายการ`, 'success');
+    }
+  } catch (e) { showToast('โหลด SKU ไม่ได้: '+e.message, 'error'); }
+  hideLoading();
+}
+
+function renderSkuCount() {
+  document.getElementById('skuCount').textContent = `SKU ที่โหลดมา: ${state.skuList.length} รายการ`;
+}
+
+// ========== SETTINGS ==========
+function saveSettings() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  state.scriptUrl = url;
+  localStorage.setItem('scriptUrl', url);
+  showToast('บันทึก URL แล้ว', 'success');
+  if (url) loadSkuMaster();
+}
+
+function saveStoreSettings() {
+  state.settings.storeName = document.getElementById('storeName').value;
+  state.settings.prefixIn = document.getElementById('prefixIn').value || 'RCV';
+  state.settings.prefixOut = document.getElementById('prefixOut').value || 'ISS';
+  state.settings.prefixAdj = document.getElementById('prefixAdj').value || 'ADJ';
+  localStorage.setItem('storeSettings', JSON.stringify(state.settings));
+  generateDocNum();
+  // Update PIN screen title
+  document.getElementById('pinTitle').textContent = state.settings.storeName || 'Stock Manager';
+  showToast('บันทึกข้อมูลร้านแล้ว', 'success');
+}
+
+async function testConnection() {
+  const url = document.getElementById('scriptUrl').value.trim();
+  if (!url) { showToast('กรุณาใส่ URL ก่อน', 'warning'); return; }
+  showLoading('กำลังทดสอบ...');
+  try {
+    const res = await fetch(url + '?action=ping');
+    const data = await res.json();
+    if (data.status === 'ok') { showToast('✓ เชื่อมต่อสำเร็จ!', 'success'); setStatus(true); }
+    else { showToast('เชื่อมต่อได้แต่ response ผิดพลาด', 'error'); setStatus(false); }
+  } catch (e) { showToast('เชื่อมต่อไม่ได้: '+e.message, 'error'); setStatus(false); }
+  hideLoading();
+}
+
+function setStatus(ok) {
+  document.getElementById('statusDot').className = 'status-dot ' + (ok ? 'connected' : 'error');
+  document.getElementById('statusText').textContent = ok ? 'เชื่อมต่อแล้ว' : 'ไม่เชื่อมต่อ';
+}
+
+// ========== LOCAL SKU MODAL ==========
+function showSkuModal() { document.getElementById('skuModal').classList.add('show'); }
+function closeSkuModal() { document.getElementById('skuModal').classList.remove('show'); }
+
+function addLocalSku() {
+  const code = document.getElementById('mSkuCode').value.trim().toUpperCase();
+  const name = document.getElementById('mSkuName').value.trim();
+  const unit = document.getElementById('mSkuUnit').value.trim();
+  const cat = document.getElementById('mSkuCat').value.trim();
+  if (!code || !name) { showToast('กรุณากรอก SKU Code และชื่อสินค้า', 'warning'); return; }
+  if (state.skuList.find(s => s.code === code)) { showToast('SKU นี้มีอยู่แล้ว', 'warning'); return; }
+  state.skuList.push({ code, name, unit, category: cat });
+  localStorage.setItem('skuList', JSON.stringify(state.skuList));
+  renderSkuCount();
+  closeSkuModal();
+  showToast('+ เพิ่ม SKU แล้ว: ' + name, 'success');
+  document.getElementById('mSkuCode').value = '';
+  document.getElementById('mSkuName').value = '';
+  document.getElementById('mSkuUnit').value = '';
+  document.getElementById('mSkuCat').value = '';
+}
+
+// ========== SCRIPT CODE ==========
+const APPS_SCRIPT_CODE = `// ======================================================
+// Stock Manager — Google Apps Script Backend
+// วางไว้ใน Extensions > Apps Script > Deploy > Web App
+// Execute as: Me | Who has access: Anyone
+// ======================================================
+
+const SHEET_NAME = "TRANSACTIONS";
+const SKU_SHEET  = "SKU_MASTER";
+const SS = SpreadsheetApp.getActiveSpreadsheet();
+
+function doGet(e) {
+  const action = e.parameter.action;
+  if (action === "ping")    return json({ status: "ok", msg: "pong" });
+  if (action === "getRows") return json(getRows());
+  if (action === "getSkus") return json(getSkus());
+  return json({ status: "error", message: "Unknown action" });
+}
+
+function doPost(e) {
+  try {
+    const body = JSON.parse(e.postData.contents);
+    if (body.action === "appendRows") return json(appendRows(body.rows));
+    return json({ status: "error", message: "Unknown action" });
+  } catch(err) {
+    return json({ status: "error", message: err.message });
+  }
+}
+
+function getRows() {
+  const sheet = SS.getSheetByName(SHEET_NAME);
+  if (!sheet) return { status: "error", message: "Sheet not found" };
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return { status: "ok", rows: [] };
+  const rows = data.slice(1).map(r => r.map(c =>
+    c instanceof Date ? Utilities.formatDate(c, Session.getScriptTimeZone(), "yyyy-MM-dd") : c
+  ));
+  return { status: "ok", rows };
+}
+
+function getSkus() {
+  const sheet = SS.getSheetByName(SKU_SHEET);
+  if (!sheet) return { status: "ok", skus: [] };
+  const data = sheet.getDataRange().getValues();
+  if (data.length <= 1) return { status: "ok", skus: [] };
+  return { status: "ok", skus: data.slice(1) };
+}
+
+function appendRows(rows) {
+  let sheet = SS.getSheetByName(SHEET_NAME);
+  if (!sheet) {
+    sheet = SS.insertSheet(SHEET_NAME);
+    sheet.appendRow([
+      "DOC_NUM","DOC_DATE","TYPE","SKU_CODE","SKU_NAME",
+      "UNIT","QTY","REF","DOC_NOTE","LINE_NOTE","USER","TIMESTAMP"
+    ]);
+    sheet.getRange(1,1,1,12).setFontWeight("bold")
+      .setBackground("#2D5A3D").setFontColor("white");
+    sheet.setFrozenRows(1);
+  }
+  rows.forEach(r => {
+    sheet.appendRow([
+      r.docNum, r.docDate, r.type, r.skuCode, r.skuName,
+      r.unit, r.qty, r.ref, r.docNote, r.lineNote, r.user, r.ts
+    ]);
+  });
+  SpreadsheetApp.flush();
+  return { status: "ok", count: rows.length };
+}
+
+function json(obj) {
+  return ContentService
+    .createTextOutput(JSON.stringify(obj))
+    .setMimeType(ContentService.MimeType.JSON);
+}`;
+
+function renderScriptCode() {
+  document.getElementById('scriptCodeDisplay').textContent = APPS_SCRIPT_CODE;
+}
+
+function copyScript() {
+  navigator.clipboard.writeText(APPS_SCRIPT_CODE).then(() => {
+    showToast('คัดลอกโค้ดแล้ว', 'success');
+  });
+}
+
+// ========== UI HELPERS ==========
+function showLoading(msg) {
+  document.getElementById('loadingMsg').textContent = msg || 'กำลังโหลด...';
+  document.getElementById('loadingOverlay').classList.add('show');
+}
+function hideLoading() { document.getElementById('loadingOverlay').classList.remove('show'); }
+
+function showToast(msg, type) {
+  const container = document.getElementById('toastContainer');
+  const t = document.createElement('div');
+  t.className = 'toast ' + (type||'');
+  t.innerHTML = `<span>${type==='success'?'✓':type==='error'?'✕':'!'}</span><span>${msg}</span>`;
+  container.appendChild(t);
+  setTimeout(() => t.remove(), 4000);
+}
+
+// ========== PIN SYSTEM ==========
+const PIN_KEY       = 'appPin';
+const ADMIN_PIN_KEY = 'appAdminPin';
+const DEFAULT_PIN   = '1234';
+const DEFAULT_ADMIN = '9999';
+const MAX_ATTEMPTS  = 5;
+const LOCK_MINUTES  = 10; // auto-lock after N minutes idle
+
+let pinBuffer = '';
+let pinAttempts = 0;
+let pinLockedUntil = 0;
+let pinMode = 'login'; // 'login' | 'firstSetup'
+let idleTimer = null;
+
+function getPin()      { return localStorage.getItem(PIN_KEY) || DEFAULT_PIN; }
+function getAdminPin() { return localStorage.getItem(ADMIN_PIN_KEY) || DEFAULT_ADMIN; }
+
+function initPin() {
+  const now = Date.now();
+  const locked = parseInt(localStorage.getItem('pinLockedUntil') || '0');
+  pinLockedUntil = locked;
+  if (now < locked) {
+    const secs = Math.ceil((locked - now) / 1000);
+    showPinScreen(`ล็อกอยู่ อีก ${secs} วินาที`, true);
+    setTimeout(initPin, 1000);
+    return;
+  }
+  const isLoggedIn = sessionStorage.getItem('pinOk') === '1';
+  if (isLoggedIn) {
+    hidePinScreen();
+    startIdleTimer();
+  } else {
+    showPinScreen();
+  }
+}
+
+function showPinScreen(errorMsg, locked) {
+  document.getElementById('pinScreen').classList.add('show');
+  document.getElementById('pinTitle').textContent = state.settings.storeName || 'Stock Manager';
+  document.getElementById('pinSub').textContent = locked ? '' : 'ใส่รหัส PIN เพื่อเข้าใช้งาน';
+  document.getElementById('pinError').textContent = errorMsg || '';
+  document.getElementById('pinAttempts').textContent = '';
+  pinBuffer = '';
+  updateDots();
+  if (locked) {
+    document.getElementById('pinAttempts').innerHTML = '<span class="pin-locked">🔒 ระบบล็อกชั่วคราว</span>';
+  }
+}
+
+function hidePinScreen() {
+  document.getElementById('pinScreen').classList.remove('show');
+}
+
+function pinPress(digit) {
+  if (Date.now() < pinLockedUntil) return;
+  if (pinBuffer.length >= 4) return;
+  pinBuffer += digit;
+  updateDots();
+  if (pinBuffer.length === 4) {
+    setTimeout(checkPin, 120);
+  }
+}
+
+function pinDel() {
+  pinBuffer = pinBuffer.slice(0, -1);
+  updateDots();
+  document.getElementById('pinError').textContent = '';
+}
+
+function updateDots() {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById('d'+i);
+    d.classList.toggle('filled', i < pinBuffer.length);
+    d.classList.remove('error');
+  }
+}
+
+function checkPin() {
+  const entered = pinBuffer;
+  pinBuffer = '';
+  const correctUser  = getPin();
+  const correctAdmin = getAdminPin();
+
+  if (entered === correctUser || entered === correctAdmin) {
+    // Success
+    pinAttempts = 0;
+    localStorage.removeItem('pinLockedUntil');
+    sessionStorage.setItem('pinOk', '1');
+    if (entered === correctAdmin) sessionStorage.setItem('isAdmin', '1');
+    else sessionStorage.removeItem('isAdmin');
+    hidePinScreen();
+    startIdleTimer();
+    updateDots();
+  } else {
+    // Wrong
+    pinAttempts++;
+    shakeError();
+    const remaining = MAX_ATTEMPTS - pinAttempts;
+    if (remaining <= 0) {
+      const lockUntil = Date.now() + 2 * 60 * 1000; // lock 2 min
+      localStorage.setItem('pinLockedUntil', lockUntil.toString());
+      pinLockedUntil = lockUntil;
+      document.getElementById('pinError').textContent = '❌ รหัสผิดเกินกำหนด ระบบล็อก 2 นาที';
+      document.getElementById('pinAttempts').innerHTML = '<span class="pin-locked">🔒 ล็อกอยู่</span>';
+      pinAttempts = 0;
+      setTimeout(initPin, 2000);
+    } else {
+      document.getElementById('pinError').textContent = `รหัสไม่ถูกต้อง (เหลือ ${remaining} ครั้ง)`;
+      document.getElementById('pinAttempts').textContent = `ลองใหม่ได้อีก ${remaining} ครั้ง`;
+    }
+    updateDots();
+  }
+}
+
+function shakeError() {
+  for (let i = 0; i < 4; i++) {
+    const d = document.getElementById('d'+i);
+    d.classList.add('error');
+  }
+  setTimeout(() => {
+    for (let i = 0; i < 4; i++) document.getElementById('d'+i).classList.remove('error');
+  }, 600);
+}
+
+function lockApp() {
+  sessionStorage.removeItem('pinOk');
+  sessionStorage.removeItem('isAdmin');
+  clearIdleTimer();
+  showPinScreen();
+}
+
+function startIdleTimer() {
+  clearIdleTimer();
+  idleTimer = setTimeout(lockApp, LOCK_MINUTES * 60 * 1000);
+  ['touchstart','click','keydown','scroll'].forEach(ev =>
+    document.addEventListener(ev, resetIdleTimer, { passive: true })
+  );
+}
+
+function resetIdleTimer() {
+  clearIdleTimer();
+  idleTimer = setTimeout(lockApp, LOCK_MINUTES * 60 * 1000);
+}
+
+function clearIdleTimer() {
+  if (idleTimer) clearTimeout(idleTimer);
+}
+
+// ===== Change PIN =====
+function showPinTab(tab) {
+  document.getElementById('changePinSection').style.display   = tab === 'change' ? '' : 'none';
+  document.getElementById('changeAdminSection').style.display = tab === 'admin'  ? '' : 'none';
+  document.getElementById('changePinTab').classList.toggle('active',  tab === 'change');
+  document.getElementById('changeAdminTab').classList.toggle('active', tab === 'admin');
+}
+
+function changePin(role) {
+  const isAdmin = sessionStorage.getItem('isAdmin') === '1';
+  if (role === 'admin' && !isAdmin) {
+    showToast('ต้องล็อกอินด้วย PIN Admin ก่อน', 'error'); return;
+  }
+  const oldEl   = role === 'user' ? 'oldPin'        : 'oldAdminPin';
+  const newEl   = role === 'user' ? 'newPin'        : 'newAdminPin';
+  const confEl  = role === 'user' ? 'confirmPin'    : 'confirmAdminPin';
+  const storeKey = role === 'user' ? PIN_KEY         : ADMIN_PIN_KEY;
+  const current  = role === 'user' ? getPin()        : getAdminPin();
+
+  const oldVal  = document.getElementById(oldEl).value.trim();
+  const newVal  = document.getElementById(newEl).value.trim();
+  const confVal = document.getElementById(confEl).value.trim();
+
+  if (oldVal !== current) { showToast('PIN เดิมไม่ถูกต้อง', 'error'); return; }
+  if (!/^\d{4}$/.test(newVal)) { showToast('PIN ใหม่ต้องเป็นตัวเลข 4 หลัก', 'warning'); return; }
+  if (newVal !== confVal) { showToast('PIN ใหม่ไม่ตรงกัน', 'warning'); return; }
+
+  localStorage.setItem(storeKey, newVal);
+  showToast(`✓ เปลี่ยน PIN ${role === 'admin' ? 'Admin' : 'ผู้ใช้'} สำเร็จ`, 'success');
+  document.getElementById(oldEl).value = '';
+  document.getElementById(newEl).value = '';
+  document.getElementById(confEl).value = '';
+}
+
+// ========== BOOTSTRAP ==========
+init();
+initPin();
+</script>
+</body>
+</html>
